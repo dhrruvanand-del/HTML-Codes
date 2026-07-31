@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Cricket Game</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .score-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn-run {
+            width: 70px;
+            height: 70px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50%;
+            transition: transform 0.1s ease;
+        }
+        .btn-run:active {
+            transform: scale(0.9);
+        }
+        .action-screen {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                
+                <!-- Game Header -->
+                <div class="text-center mb-4">
+                    <h1 class="fw-bold text-primary">🏏 Hand Cricket</h1>
+                    <p class="text-muted" id="game-subtitle">Choose your innings mode to start!</p>
+                </div>
+
+                <!-- Main Game Card -->
+                <div class="score-card p-4 mb-3">
+                    
+                    <!-- Mode Selection Section -->
+                    <div id="mode-selection" class="text-center py-4">
+                        <h4 class="mb-3">Select Game Mode</h4>
+                        <div class="d-grid gap-2 col-8 mx-auto">
+                            <button class="btn btn-success btn-lg" onclick="startGame('batting')">Bat First</button>
+                            <button class="btn btn-danger btn-lg" onclick="startGame('bowling')">Bowl First</button>
+                        </div>
+                    </div>
+
+                    <!-- Gameplay Section (Hidden Initially) -->
+                    <div id="gameplay-section" class="d-none">
+                        <!-- Scoreboard Header -->
+                        <div class="row text-center border-bottom pb-3 mb-3">
+                            <div class="col-6 border-end">
+                                <span class="text-muted d-block small">CURRENT INNINGS</span>
+                                <h5 id="innings-label" class="fw-bold text-secondary mb-0">You are Batting</h5>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-muted d-block small" id="target-label-title">TARGET</span>
+                                <h5 id="target-display" class="fw-bold text-dark mb-0">-</h5>
+                            </div>
+                        </div>
+
+                        <!-- Scores -->
+                        <div class="row text-center mb-4">
+                            <div class="col-6">
+                                <span class="text-muted d-block">Your Score</span>
+                                <h2 id="player-score" class="fw-bold text-primary mb-0">0</h2>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-muted d-block">Computer Score</span>
+                                <h2 id="comp-score" class="fw-bold text-danger mb-0">0</h2>
+                            </div>
+                        </div>
+
+                        <!-- Action Feedback Screen -->
+                        <div class="action-screen bg-light rounded p-3 mb-4 text-center">
+                            <div id="message-box">
+                                <p class="text-muted mb-0">Tap a run button below to play your shot!</p>
+                            </div>
+                        </div>
+
+                        <!-- Run Buttons (1 to 6) -->
+                        <div id="controls" class="text-center">
+                            <p class="fw-semibold mb-2">Select a number (1-6):</p>
+                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                <button class="btn btn-outline-primary btn-run" onclick="playTurn(1)">1</button>
+                                <button class="btn btn-outline-primary btn-run" onclick="playTurn(2)">2</button>
+                                <button class="btn btn-outline-primary btn-run" onclick="playTurn(3)">3</button>
+                                <button class="btn btn-outline-primary btn-run" onclick="playTurn(4)">4</button>
+                                <button class="btn btn-outline-primary btn-run" onclick="playTurn(5)">5</button>
+                                <button class="btn btn-outline-primary btn-run" onclick="playTurn(6)">6</button>
+                            </div>
+                        </div>
+
+                        <!-- Reset / Play Again Button (Hidden Initially) -->
+                        <div id="restart-container" class="d-grid mt-4 d-none">
+                            <button class="btn btn-dark btn-lg" onclick="resetGame()">Play Again</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Info -->
+                <div class="text-center text-muted small">
+                    <p>Classic Hand Cricket Game built with Bootstrap 5</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Game Logic Script -->
+    <script>
+        let gameState = {
+            mode: '',          // 'batting' or 'bowling'
+            phase: 1,          // 1st innings or 2nd innings
+            playerScore: 0,
+            compScore: 0,
+            target: 0,
+            isGameOver: false
+        };
+
+        function startGame(mode) {
+            gameState.mode = mode;
+            gameState.phase = 1;
+            gameState.playerScore = 0;
+            gameState.compScore = 0;
+            gameState.target = 0;
+            gameState.isGameOver = false;
+
+            document.getElementById('mode-selection').classList.add('d-none');
+            document.getElementById('gameplay-section').classList.remove('d-none');
+            document.getElementById('restart-container').classList.add('d-none');
+            document.getElementById('controls').classList.remove('d-none');
+            document.getElementById('message-box').innerHTML = `<p class="text-muted mb-0">Tap a run button below to play your shot!</p>`;
+
+            updateUI();
+        }
+
+        function resetGame() {
+            // Hide gameplay and show mode selection screen again
+            document.getElementById('gameplay-section').classList.add('d-none');
+            document.getElementById('mode-selection').classList.remove('d-none');
+            document.getElementById('restart-container').classList.add('d-none');
+        }
+
+        function playTurn(playerChoice) {
+            if (gameState.isGameOver) return;
+
+            let compChoice = Math.floor(Math.random() * 6) + 1;
+            let isBattingNow = (gameState.phase === 1 && gameState.mode === 'batting') || 
+                               (gameState.phase === 2 && gameState.mode === 'bowling');
+
+            let messageHTML = '';
+
+            if (playerChoice === compChoice) {
+                // OUT!
+                if (isBattingNow) {
+                    messageHTML = `<span class="text-danger fw-bold fs-5">OUT! 🔴</span><br>You played <strong>${playerChoice}</strong>, Computer bowled <strong>${compChoice}</strong>.`;
+                } else {
+                    messageHTML = `<span class="text-success fw-bold fs-5">WICKET! 🎯</span><br>Computer batted <strong>${compChoice}</strong>, You bowled <strong>${playerChoice}</strong>.`;
+                }
+
+                // Transition to Phase 2 or End Game
+                if (gameState.phase === 1) {
+                    if (gameState.mode === 'batting') {
+                        gameState.target = gameState.playerScore + 1;
+                        messageHTML += `<br><span class="text-primary fw-semibold">End of 1st Innings! Target to defend: ${gameState.target}</span>`;
+                    } else {
+                        gameState.target = gameState.compScore + 1;
+                        messageHTML += `<br><span class="text-danger fw-semibold">End of 1st Innings! Target to chase: ${gameState.target}</span>`;
+                    }
+                    gameState.phase = 2;
+                } else {
+                    // Match Over (Out in 2nd innings)
+                    if (gameState.mode === 'batting') {
+                        // User was defending target
+                        if (gameState.playerScore > gameState.compScore) {
+                            endMatch(`<span class="text-success fw-bold fs-4">🎉 YOU WON THE MATCH! 🎉</span><br>You defended your target successfully!`);
+                        } else if (gameState.playerScore === gameState.compScore) {
+                            endMatch(`<span class="text-warning fw-bold fs-4">🤝 IT'S A TIE! 🤝</span><br>Scores level at ${gameState.playerScore}!`);
+                        } else {
+                            endMatch(`<span class="text-danger fw-bold fs-4">💻 COMPUTER WON! 💻</span><br>Computer chased your target!`);
+                        }
+                    } else {
+                        // User was chasing target
+                        if (gameState.playerScore >= gameState.target) {
+                            endMatch(`<span class="text-success fw-bold fs-4">🎉 YOU WON THE MATCH! 🎉</span><br>You chased down the target!`);
+                        } else if (gameState.playerScore === gameState.target - 1) {
+                            endMatch(`<span class="text-warning fw-bold fs-4">🤝 IT'S A TIE! 🤝</span><br>Scores level!`);
+                        } else {
+                            endMatch(`<span class="text-danger fw-bold fs-4">💻 COMPUTER WON! 💻</span><br>You failed to chase the target!`);
+                        }
+                    }
+                    return;
+                }
+            } else {
+                // RUNS SCORED
+                if (isBattingNow) {
+                    gameState.playerScore += playerChoice;
+                    messageHTML = `You scored <span class="text-success fw-bold">${playerChoice} runs</span>. (Computer played: ${compChoice})`;
+                    
+                    // Check if target chased in 2nd innings (if user is batting 2nd)
+                    if (gameState.phase === 2 && gameState.mode === 'bowling' && gameState.playerScore >= gameState.target) {
+                        endMatch(`<span class="text-success fw-bold fs-4">🎉 YOU WON THE MATCH! 🎉</span><br>You successfully chased the target!`);
+                        return;
+                    }
+                } else {
+                    gameState.compScore += compChoice;
+                    messageHTML = `Computer scored <span class="text-danger fw-bold">${compChoice} runs</span>. (You bowled: ${playerChoice})`;
+
+                    // Check if target chased in 2nd innings (if user is bowling 2nd)
+                    if (gameState.phase === 2 && gameState.mode === 'batting' && gameState.compScore >= gameState.target) {
+                        endMatch(`<span class="text-danger fw-bold fs-4">💻 COMPUTER WON! 💻</span><br>Computer successfully chased your target!`);
+                        return;
+                    }
+                }
+            }
+
+            document.getElementById('message-box').innerHTML = messageHTML;
+            updateUI();
+        }
+
+        function endMatch(customMessage) {
+            gameState.isGameOver = true;
+            document.getElementById('message-box').innerHTML = customMessage;
+            document.getElementById('controls').classList.add('d-none');
+            document.getElementById('restart-container').classList.remove('d-none');
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('player-score').innerText = gameState.playerScore;
+            document.getElementById('comp-score').innerText = gameState.compScore;
+
+            let isBattingNow = (gameState.phase === 1 && gameState.mode === 'batting') || 
+                               (gameState.phase === 2 && gameState.mode === 'bowling');
+
+            document.getElementById('innings-label').innerText = isBattingNow ? "You are Batting" : "You are Bowling";
+            
+            if (gameState.phase === 2 || (gameState.phase === 1 && gameState.target > 0)) {
+                document.getElementById('target-display').innerText = gameState.target;
+            } else {
+                document.getElementById('target-display').innerText = "-";
+            }
+        }
+    </script>
+</body>
+</html>
